@@ -11,7 +11,7 @@ uses Classes, SysUtils, HttpConnection,
      {$ELSE}
      Contnrs, OldRttiUnMarshal,
      {$ENDIF}
-     DB, JsonListAdapter, RestException;
+     DB, JsonListAdapter, RestException, DataSetToJson, SQLMemMain;
 
 const
   DEFAULT_COOKIE_VERSION = 1; {Cookies using the default version correspond to RFC 2109.}
@@ -222,6 +222,10 @@ type
     procedure GetAsDataSet(ADataSet: TDataSet);overload;
     function GetAsDataSet(): TDataSet;overload;
     function GetAsDataSet(const RootElement: String): TDataSet;overload;
+    function PutAsDataSet(ADataSet: TDataSet) : String;   overload;
+    function PutAsDataSet(ADataSet: TSQLMemDataSet) : string; overload;
+    function PostAsDataSet(ADataSet: TDataSet) : String; overload;
+    function PostAsDataSet(ADataSet: TSQLMemDataSet) : string; overload;
     {$ENDIF}
   end;
 
@@ -861,6 +865,42 @@ begin
 
   TJsonToDataSetConverter.UnMarshalToDataSet(ADataSet, vJson);
 end;
+
+
+function TResource.PutAsDataSet(ADataSet: TDataSet) : string;
+var
+  content: String;
+begin
+  content := convertDataSetToJson(ADataSet);
+  Result := Put(content);
+end;
+
+function TResource.PutAsDataSet(ADataSet: TSQLMemDataSet) : string;
+var
+  content: String;
+begin
+  content := convertDataSetToJson(ADataSet);
+  Result := Put(content);
+end;
+
+
+function TResource.PostAsDataSet(ADataSet: TDataSet) : string;
+var
+  content: String;
+begin
+  content := convertDataSetToJson(ADataSet);
+  Result := Post(content);
+end;
+
+
+function TResource.PostAsDataSet(ADataSet: TSQLMemDataSet) : string;
+var
+  content: String;
+begin
+  content := convertDataSetToJson(ADataSet);
+  Result := Post(content);
+end;
+
 {$ENDIF}
 
 procedure TResource.SetContent(entity: TObject);
@@ -961,6 +1001,10 @@ begin
     vStringStream.Free;
   end;
 end;
+
+
+
+
 
 { TJsonListAdapter }
 
